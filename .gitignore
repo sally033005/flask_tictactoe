@@ -1,0 +1,48 @@
+# --- Python / Flask ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# Flask / local files
+instance/
+*.log
+*.pid
+
+# IDE / Editor settings
+.vscode/
+.idea/
+*.swp
+
+# macOS system files
+.DS_Store
+
+# Byte-compiled / optimized / DLL files
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Coverage / testing
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
