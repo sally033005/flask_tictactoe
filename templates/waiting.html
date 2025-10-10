@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Waiting for Player 2</title>
+</head>
+<body>
+    <h1>Waiting for Player 2...</h1>
+    <p>Room Code: <strong>{{ code }}</strong></p>
+    <p>Share this code with your friend to join.</p>
+
+    <script>
+        const gameId = "{{ code }}";
+
+        async function checkPlayer2() {
+            try {
+                const res = await fetch(`/game_state/${gameId}`);
+                const data = await res.json();
+                if (!data.error && data['board']) {
+                    // Player 2 has joined if 'O' has a name
+                    // We check wins['O'] to see if player exists
+                    if (data['wins']['O'] !== 0 || data['wins']['O'] === 0 && Object.keys(data['wins']).length === 2) {
+                        // Redirect to the game board
+                        window.location.href = "/room/" + gameId;
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // Poll every 2 seconds
+        setInterval(checkPlayer2, 2000);
+    </script>
+</body>
+</html>

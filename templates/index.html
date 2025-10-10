@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tic Tac Toe</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>🎮 Tic Tac Toe</h1>
+    <form action="/setup" method="post">
+      <button name="mode" value="1">1 Player (vs Computer)</button>
+      <button name="mode" value="2">2 Players (Online)</button>
+    </form>
+    <br>
+    <a href="/join" class="btn">Join a Game</a>
+  </div>
+</body>
+</html>
