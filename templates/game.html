@@ -31,10 +31,26 @@
         <p id="wins">Wins: {{ player_name }} (X) - {{ wins['X'] }} | {{ ai_name }} (O) - {{ wins['O'] }}</p>
     </div>
 
+    {% if mode == '1' %}
+    <script>
+        const winner = "{{ winner }}";
+        const draw = "{{ draw }}";
+    
+        if (winner && winner !== "None") {
+            alert("Winner: " + (winner === 'X' ? "{{ player_name }}" : "{{ ai_name }}"));
+            window.location.href = "/reset";
+        } else if (draw === "True") {
+            alert("It's a draw!");
+            window.location.href = "/reset";
+        }
+    </script>
+    {% endif %}    
+
     {% if mode == '2' %}
     <script>
-        const gameId = "{{ code }}";
-
+        let mode = "{{ mode }}";
+        let gameId = "{{ code }}" || "";  // empty string for 1-player mode
+        
         function updateBoard(board) {
             const cells = document.querySelectorAll('.cell');
             board.forEach((val, idx) => {
@@ -43,48 +59,48 @@
                     cells[idx].textContent = val;
                     cells[idx].classList.add('filled');
                     cells[idx].classList.remove('empty');
-                    cells[idx].href = '#'; // disable link
+                    if (cells[idx].tagName === 'A') cells[idx].href = '#';
                 }
             });
         }
-
+        
         async function fetchGameState() {
             try {
-                const res = await fetch(`/game_state/${gameId}`);
+                const url = mode === '1' ? `/game_state/` : `/game_state/${gameId}`;
+                const res = await fetch(url);
                 const data = await res.json();
                 if (data.error) return;
-
+        
+                // Update board
                 updateBoard(data.board);
-
+        
                 // Update current turn
-                const turnElement = document.getElementById('current-turn');
-                if (turnElement) turnElement.textContent = "Current Turn: " + data.current;
-
+                document.getElementById('current-turn').textContent = "Current Turn: " + data.current;
+        
                 // Update wins
+                let playerX = data.player_name || data.players.X;
+                let playerO = data.ai_name || data.players.O;
                 document.getElementById('wins').textContent =
-                    "Wins: {{ player_name }} (X) - " + data.wins['X'] +
-                    " | {{ ai_name }} (O) - " + data.wins['O'];
-
-                // Handle winner
+                    `Wins: ${playerX} (X) - ${data.wins['X']} | ${playerO} (O) - ${data.wins['O']}`;
+        
+                // Show winner or draw
                 if (data.winner) {
-                    alert("Winner: " + (data.winner === 'X' ? "{{ player_name }}" : "{{ ai_name }}"));
+                    let winnerName = data.winner === 'X' ? playerX : playerO;
+                    alert(`Winner: ${winnerName}`);
                     window.location.href = "/reset";
-                }
-
-                // Handle draw
-                if (data.draw) {
+                } else if (data.draw) {
                     alert("It's a draw!");
                     window.location.href = "/reset";
                 }
-
+        
             } catch (err) {
                 console.error(err);
             }
         }
-
+        
         // Poll every 1 second
         setInterval(fetchGameState, 1000);
-    </script>
+        </script>        
     {% endif %}
 </body>
 </html>

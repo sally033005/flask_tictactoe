@@ -111,31 +111,44 @@ def game():
 @app.route('/move/<int:cell>')
 def move(cell):
     mode = session.get('mode')
-    if mode == '1':  # Player vs AI
+
+    # --- 1 Player Mode ---
+    if mode == '1':
         board = session['board']
+        wins = session['wins']
         current = session['current']
-        winner = check_winner(board)
-        if not winner and board[cell] == ' ':
-            board[cell] = current
+
+        # Player move
+        if board[cell] == ' ' and not check_winner(board) and not check_draw(board):
+            board[cell] = 'X'
             winner = check_winner(board)
             if winner:
-                session['wins'][current] += 1
-            elif not check_draw(board):
+                wins[winner] += 1
+                session['wins'] = wins
+                session['board'] = board
+                return redirect(url_for('game'))
+
+            if not check_draw(board):
                 # AI move
                 ai_move = random_ai_move(board)
                 board[ai_move] = 'O'
-                if check_winner(board):
-                    session['wins']['O'] += 1
-            session['board'] = board
+                winner = check_winner(board)
+                if winner:
+                    wins[winner] += 1
+
+        session['wins'] = wins
+        session['board'] = board
         return redirect(url_for('game'))
+
+    # --- 2 Player Mode ---
     else:
-        # Online 2-player move handled via shared session
         code = session.get('code')
         player_symbol = session.get('player_symbol')
         if not code or code not in games:
             return "Invalid game code."
         game = games[code]
         board = game['board']
+
         if game['current'] == player_symbol and board[cell] == ' ':
             board[cell] = player_symbol
             winner = check_winner(board)
@@ -143,6 +156,7 @@ def move(cell):
                 game['wins'][winner] += 1
             elif not check_draw(board):
                 game['current'] = 'O' if player_symbol == 'X' else 'X'
+
         return redirect(url_for('game_room', code=code))
 
 @app.route('/room/<code>')
@@ -181,20 +195,38 @@ def reset():
             games[code]['current'] = 'X'
     return redirect(url_for('game' if mode == '1' else 'game_room', code=session.get('code')))
 
+@app.route('/game_state/', defaults={'code': None})
 @app.route('/game_state/<code>')
 def game_state(code):
-    """Return the current board and game info as JSON for polling."""
-    if code not in games:
-        return jsonify({'error': 'Invalid game code'}), 404
-    
-    game = games[code]
-    return jsonify({
-        'board': game['board'],
-        'current': game['current'],
-        'winner': check_winner(game['board']),
-        'draw': check_draw(game['board']),
-        'wins': game['wins']
-    })
+    mode = session.get('mode')
+
+    if mode == '1':
+        board = session.get('board', new_board())
+        current = session.get('current', 'X')
+        winner = check_winner(board)
+        draw = check_draw(board)
+        wins = session.get('wins', {'X': 0, 'O': 0})
+        return jsonify({
+            'board': board,
+            'current': current,
+            'winner': winner,
+            'draw': draw,
+            'wins': wins,
+            'player_name': session.get('player_name'),
+            'ai_name': session.get('ai_name')
+        })
+    else:
+        if not code or code not in games:
+            return jsonify({'error': 'Invalid game code'}), 404
+        game = games[code]
+        return jsonify({
+            'board': game['board'],
+            'current': game['current'],
+            'winner': check_winner(game['board']),
+            'draw': check_draw(game['board']),
+            'wins': game['wins'],
+            'players': game['players']
+        })
 
 if __name__ == '__main__':
     app.run(debug=True)
