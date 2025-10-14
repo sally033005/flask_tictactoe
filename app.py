@@ -132,10 +132,7 @@ def move(cell):
 
             if not check_draw(board):
                 # AI move depends on difficulty
-                if difficulty == 'easy':
-                    ai_move = random_ai_move(board)
-                else:
-                    ai_move = best_move(board)
+                ai_move = best_move(board, difficulty)
 
                 board[ai_move] = 'O'
                 winner = check_winner(board)

@@ -1,4 +1,4 @@
-import math
+import math, random
 
 def is_winner(board, player):
     win_patterns = [
@@ -38,15 +38,27 @@ def minimax(board, depth, is_maximizing):
                 best_score = min(score, best_score)
         return best_score
 
-def best_move(board):
+def best_move(board, difficulty="hard"):
+    """Return the best AI move based on difficulty level."""
+    available = [i for i, v in enumerate(board) if v == ' ']
+
+    # --- Easy mode: random move
+    if difficulty == "easy":
+        return random.choice(available)
+
+    # --- Medium mode: 50% chance random, 50% minimax
+    if difficulty == "medium":
+        if random.random() < 0.5:
+            return random.choice(available)
+
+    # --- Hard mode (default): full minimax
     best_score = -math.inf
     move = None
-    for i in range(9):
-        if board[i] == ' ':
-            board[i] = 'O'
-            score = minimax(board, 0, False)
-            board[i] = ' '
-            if score > best_score:
-                best_score = score
-                move = i
+    for i in available:
+        board[i] = 'O'
+        score = minimax(board, 0, False)
+        board[i] = ' '
+        if score > best_score:
+            best_score = score
+            move = i
     return move
