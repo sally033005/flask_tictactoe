@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import random
 import string
+from ai import best_move
 
 app = Flask(__name__)
 app.secret_key = "tictactoe_secret_key"
@@ -53,8 +54,10 @@ def start():
     mode = session.get('mode')
     if mode == '1':
         player_name = request.form.get('player_name')
+        difficulty = request.form.get('difficulty')
         session['player_name'] = player_name
         session['ai_name'] = 'Computer'
+        session['difficulty'] = difficulty
         session['board'] = new_board()
         session['current'] = 'X'
         session['wins'] = {'X': 0, 'O': 0}
@@ -112,11 +115,10 @@ def game():
 def move(cell):
     mode = session.get('mode')
 
-    # --- 1 Player Mode ---
     if mode == '1':
         board = session['board']
         wins = session['wins']
-        current = session['current']
+        difficulty = session.get('difficulty', 'easy')
 
         # Player move
         if board[cell] == ' ' and not check_winner(board) and not check_draw(board):
@@ -129,8 +131,12 @@ def move(cell):
                 return redirect(url_for('game'))
 
             if not check_draw(board):
-                # AI move
-                ai_move = random_ai_move(board)
+                # AI move depends on difficulty
+                if difficulty == 'easy':
+                    ai_move = random_ai_move(board)
+                else:
+                    ai_move = best_move(board)
+
                 board[ai_move] = 'O'
                 winner = check_winner(board)
                 if winner:
