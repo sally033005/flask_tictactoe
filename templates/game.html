@@ -35,6 +35,8 @@
 </head>
 
 <body>
+    {% extends "base.html" %}
+    {% block content %}
     <h1 style="text-align:center;">Tic-Tac-Toe</h1>
 
     <p style="text-align:center;">
@@ -132,6 +134,7 @@
         setInterval(fetchGameState, 1000);
     </script>
     {% endif %}
+    {% endblock %}
 </body>
 
 </html>

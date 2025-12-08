@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title if title else "Tic Tac Toe" }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <header class="main-header">
+        <div class="logo">Sally's Tic Tac Toe</div>
+        <nav class="topnav">
+            <a href="{{ url_for('index') }}">Home</a>
+
+            <form id="onePlayer" action="/setup" method="POST">
+                <input type="hidden" name="mode" value="1">
+                <a href="#" onclick="document.getElementById('onePlayer').submit();">1 Player</a>
+            </form>
+
+            <form id="twoPlayer" action="/setup" method="POST">
+                <input type="hidden" name="mode" value="2">
+                <a href="#" onclick="document.getElementById('twoPlayer').submit();">2 Players</a>
+            </form>
+
+            <a href="{{ url_for('join') }}">Join Game</a>
+        </nav>
+    </header>
+
+    <main class="content">
+        {% block content %}{% endblock %}
+    </main>
+
+</body>
+
+</html>
