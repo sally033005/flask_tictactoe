@@ -2,10 +2,10 @@
    GENERAL LAYOUT
 --------------------------------------------------- */
 body {
-    background: #f5f7fb;
+    background-color: #c6d9ec;
     margin: 0;
     font-family: 'Segoe UI', Tahoma, sans-serif;
-    color: #333;
+    color: #003380;
 }
 
 main.content {
@@ -36,6 +36,9 @@ main.content {
 .main-header .logo {
     font-size: 26px;
     font-weight: bold;
+    background: linear-gradient(90deg, #ffd700, #ff6f61);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 /* Navigation */
@@ -57,19 +60,20 @@ main.content {
 
 .main-header .topnav a:hover {
     background: rgba(255,255,255,0.18);
+    color: #ffd700;
 }
 
 /* ---------------------------------------------------
    MAIN CONTAINER
 --------------------------------------------------- */
 .container {
-    background: white;
-    padding: 35px;
-    margin-top: 40px;
+    background: linear-gradient(145deg, #ffffff, #f0f4ff);
+    padding: 40px;
+    margin-top: 50px;
     width: 420px;
     max-width: 90%;
-    border-radius: 12px;
-    box-shadow: 0 0 14px rgba(0,0,0,0.08);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
     text-align: center;
     animation: fadeIn 0.35s ease;
 }
@@ -104,10 +108,11 @@ button, .btn {
     display: inline-block;
     padding: 12px 20px;
     border: none;
-    background: #1e88e5;
+    background: #4d94ff;
     color: white;
     border-radius: 8px;
-    font-size: 16px;
+    font-size: large;
+    font-weight: bold;
     cursor: pointer;
     transition: 0.2s;
     width: 100%;
@@ -115,6 +120,7 @@ button, .btn {
 
 button:hover, .btn:hover {
     background: #1565c0;
+    transform: translateY(-2px);
 }
 
 .btn {
@@ -182,14 +188,14 @@ input, select {
    SCOREBOARD
 --------------------------------------------------- */
 .scoreboard {
-    margin-top: 20px;
-    padding: 15px;
-    background: #e3f2fd;
-    border-radius: 10px;
-    width: 280px;
+    margin-top: 25px;
+    padding: 18px;
+    background: linear-gradient(145deg, #e3f2fd, #cce4ff);
+    border-radius: 12px;
+    width: 300px;
     margin-left: auto;
     margin-right: auto;
-    box-shadow: 0 0 12px rgba(0,0,0,0.05);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
 }
 
 .scoreboard h3 {
