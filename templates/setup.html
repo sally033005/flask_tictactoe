@@ -1,41 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    {% if mode == '1' %}
+    <h2>Single Player Setup</h2>
+    <form action="/start" method="post">
+        <label>Your Name:</label>
+        <input type="text" name="player_name" required>
 
-<head>
-    <meta charset="UTF-8">
-    <title>Setup Game</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
+        <label>Difficulty:</label>
+        <select name="difficulty" required>
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+        </select>
 
-<body>
-    {% extends "base.html" %}
-    {% block content %}
-    <div class="container">
-        {% if mode == '1' %}
-        <h2>Single Player Setup</h2>
-        <form action="/start" method="post">
-            <label>Your Name:</label>
-            <input type="text" name="player_name" required>
-
-            <label>Difficulty:</label>
-            <select name="difficulty" required>
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
-            </select>
-
-            <button type="submit">Start Game</button>
-        </form>
-        {% else %}
-        <h2>Create Online Room</h2>
-        <form action="/start" method="post">
-            <label>Your Name:</label>
-            <input type="text" name="player_name" required>
-            <button type="submit">Create Room</button>
-        </form>
-        {% endif %}
-    </div>
-    {% endblock %}
-</body>
-
-</html>
+        <button type="submit">Start Game</button>
+    </form>
+    {% else %}
+    <h2>Create Online Room</h2>
+    <form action="/start" method="post">
+        <label>Your Name:</label>
+        <input type="text" name="player_name" required>
+        <button type="submit">Create Room</button>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

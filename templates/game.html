@@ -1,140 +1,101 @@
-<!DOCTYPE html>
-<html>
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
 
-<head>
-    <title>Tic-Tac-Toe</title>
-    <style>
-        .board {
-            display: grid;
-            grid-template-columns: repeat(3, 100px);
-            grid-gap: 5px;
-            margin: 20px auto;
-        }
+<p style="text-align:center;">
+    <strong>{{ player_name }}</strong> (X) vs <strong>{{ ai_name }}</strong> (O)
+</p>
 
-        .cell {
-            width: 100px;
-            height: 100px;
-            font-size: 2em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #333;
-            cursor: pointer;
-        }
+{% if mode == '1' %}
+<p>Difficulty: {{ session.get('difficulty', 'hard').capitalize() }}</p>
+{% endif %}
 
-        .cell.filled {
-            background-color: #ddd;
-            cursor: default;
-        }
 
-        #status {
-            text-align: center;
-            margin-top: 10px;
-        }
-    </style>
-</head>
-
-<body>
-    {% extends "base.html" %}
-    {% block content %}
-    <h1 style="text-align:center;">Tic-Tac-Toe</h1>
-
-    <p style="text-align:center;">
-        <strong>{{ player_name }}</strong> (X) vs <strong>{{ ai_name }}</strong> (O)
-    </p>
-
-    {% if mode == '1' %}
-    <p>Difficulty: {{ session.get('difficulty', 'hard').capitalize() }}</p>
+<div class="board">
+    {% for i in range(9) %}
+    {% if board[i] == ' ' %}
+    <a href="{{ url_for('move', cell=i) }}" class="cell empty"></a>
+    {% else %}
+    <div class="cell filled">{{ board[i] }}</div>
     {% endif %}
+    {% endfor %}
+</div>
 
+<div id="status">
+    <p id="current-turn">Current Turn: {{ current }}</p>
+    <p id="wins">Wins: {{ player_name }} (X) - {{ wins['X'] }} | {{ ai_name }} (O) - {{ wins['O'] }}</p>
+</div>
 
-    <div class="board">
-        {% for i in range(9) %}
-        {% if board[i] == ' ' %}
-        <a href="{{ url_for('move', cell=i) }}" class="cell empty"></a>
-        {% else %}
-        <div class="cell filled">{{ board[i] }}</div>
-        {% endif %}
-        {% endfor %}
-    </div>
+{% if mode == '1' %}
+<script>
+    const winner = "{{ winner }}";
+    const draw = "{{ draw }}";
 
-    <div id="status">
-        <p id="current-turn">Current Turn: {{ current }}</p>
-        <p id="wins">Wins: {{ player_name }} (X) - {{ wins['X'] }} | {{ ai_name }} (O) - {{ wins['O'] }}</p>
-    </div>
+    if (winner && winner !== "None") {
+        alert("Winner: " + (winner === 'X' ? "{{ player_name }}" : "{{ ai_name }}"));
+        window.location.href = "/reset";
+    } else if (draw === "True") {
+        alert("It's a draw!");
+        window.location.href = "/reset";
+    }
+</script>
+{% endif %}
 
-    {% if mode == '1' %}
-    <script>
-        const winner = "{{ winner }}";
-        const draw = "{{ draw }}";
+{% if mode == '2' %}
+<script>
+    let mode = "{{ mode }}";
+    let gameId = "{{ code }}" || "";  // empty string for 1-player mode
 
-        if (winner && winner !== "None") {
-            alert("Winner: " + (winner === 'X' ? "{{ player_name }}" : "{{ ai_name }}"));
-            window.location.href = "/reset";
-        } else if (draw === "True") {
-            alert("It's a draw!");
-            window.location.href = "/reset";
-        }
-    </script>
-    {% endif %}
-
-    {% if mode == '2' %}
-    <script>
-        let mode = "{{ mode }}";
-        let gameId = "{{ code }}" || "";  // empty string for 1-player mode
-
-        function updateBoard(board) {
-            const cells = document.querySelectorAll('.cell');
-            board.forEach((val, idx) => {
-                if (cells[idx].classList.contains('filled')) return;
-                if (val !== ' ') {
-                    cells[idx].textContent = val;
-                    cells[idx].classList.add('filled');
-                    cells[idx].classList.remove('empty');
-                    if (cells[idx].tagName === 'A') cells[idx].href = '#';
-                }
-            });
-        }
-
-        async function fetchGameState() {
-            try {
-                const url = mode === '1' ? `/game_state/` : `/game_state/${gameId}`;
-                const res = await fetch(url);
-                const data = await res.json();
-                if (data.error) return;
-
-                // Update board
-                updateBoard(data.board);
-
-                // Update current turn
-                document.getElementById('current-turn').textContent = "Current Turn: " + data.current;
-
-                // Update wins
-                let playerX = data.player_name || data.players.X;
-                let playerO = data.ai_name || data.players.O;
-                document.getElementById('wins').textContent =
-                    `Wins: ${playerX} (X) - ${data.wins['X']} | ${playerO} (O) - ${data.wins['O']}`;
-
-                // Show winner or draw
-                if (data.winner) {
-                    let winnerName = data.winner === 'X' ? playerX : playerO;
-                    alert(`Winner: ${winnerName}`);
-                    window.location.href = "/reset";
-                } else if (data.draw) {
-                    alert("It's a draw!");
-                    window.location.href = "/reset";
-                }
-
-            } catch (err) {
-                console.error(err);
+    function updateBoard(board) {
+        const cells = document.querySelectorAll('.cell');
+        board.forEach((val, idx) => {
+            if (cells[idx].classList.contains('filled')) return;
+            if (val !== ' ') {
+                cells[idx].textContent = val;
+                cells[idx].classList.add('filled');
+                cells[idx].classList.remove('empty');
+                if (cells[idx].tagName === 'A') cells[idx].href = '#';
             }
+        });
+    }
+
+    async function fetchGameState() {
+        try {
+            const url = mode === '1' ? `/game_state/` : `/game_state/${gameId}`;
+            const res = await fetch(url);
+            const data = await res.json();
+            if (data.error) return;
+
+            // Update board
+            updateBoard(data.board);
+
+            // Update current turn
+            document.getElementById('current-turn').textContent = "Current Turn: " + data.current;
+
+            // Update wins
+            let playerX = data.player_name || data.players.X;
+            let playerO = data.ai_name || data.players.O;
+            document.getElementById('wins').textContent =
+                `Wins: ${playerX} (X) - ${data.wins['X']} | ${playerO} (O) - ${data.wins['O']}`;
+
+            // Show winner or draw
+            if (data.winner) {
+                let winnerName = data.winner === 'X' ? playerX : playerO;
+                alert(`Winner: ${winnerName}`);
+                window.location.href = "/reset";
+            } else if (data.draw) {
+                alert("It's a draw!");
+                window.location.href = "/reset";
+            }
+
+        } catch (err) {
+            console.error(err);
         }
+    }
 
-        // Poll every 1 second
-        setInterval(fetchGameState, 1000);
-    </script>
-    {% endif %}
-    {% endblock %}
-</body>
-
-</html>
+    // Poll every 1 second
+    setInterval(fetchGameState, 1000);
+</script>
+{% endif %}
+</div>
+{% endblock %}

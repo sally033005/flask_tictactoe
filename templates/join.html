@@ -1,26 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Join Game</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    {% extends "base.html" %}
-    {% block content %}
-  <div class="container">
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
     <h2>Join an Online Game</h2>
     {% if error %}
-      <p style="color:red;">{{ error }}</p>
+    <p style="color:red;">{{ error }}</p>
     {% endif %}
     <form method="post">
-      <label>Game Code:</label>
-      <input type="text" name="code" required>
-      <label>Your Name:</label>
-      <input type="text" name="player_name" required>
-      <button type="submit">Join Game</button>
+        <label>Game Code:</label>
+        <input type="text" name="code" required>
+        <label>Your Name:</label>
+        <input type="text" name="player_name" required>
+        <button type="submit">Join Game</button>
     </form>
-  </div>
-  {% endblock %}
-</body>
-</html>
+</div>
+{% endblock %}
