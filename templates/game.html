@@ -54,6 +54,7 @@
     <script>
         let mode = "{{ mode }}";
         let gameId = "{{ code }}" || "";  // empty string for 1-player mode
+        let notificationShown = false;
 
         function updateBoard(board) {
             const cells = document.querySelectorAll('.cell');
@@ -75,6 +76,26 @@
                 const data = await res.json();
                 if (data.error) return;
 
+                // Check if other player left the game
+                if (data.player_left && data.left_player_name) {
+                    if (!notificationShown) {
+                        notificationShown = true;
+                        alert(`${data.left_player_name} has left the game. Returning to home page.`);
+                        window.location.href = "/";
+                    }
+                    return;
+                }
+
+                // Check if other player disconnected
+                if (data.disconnected && data.disconnected_player_name) {
+                    if (!notificationShown) {
+                        notificationShown = true;
+                        alert(`${data.disconnected_player_name} has disconnected. Returning to home page.`);
+                        window.location.href = "/";
+                    }
+                    return;
+                }
+
                 // Update board
                 updateBoard(data.board);
 
@@ -94,14 +115,18 @@
                     if (again) {
                         window.location.href = "/reset";
                     } else {
+                        // Notify server that this player is leaving
+                        fetch('/leave_game');
                         window.location.href = "/";
                     }
                 }
                 else if (data.draw) {
                     let again = confirm("It's a draw!\n\nDo you want to play again?");
                     if (again) {
-                        window.location.href = `/reset/${gameId}`;
+                        window.location.href = "/reset";
                     } else {
+                        // Notify server that this player is leaving
+                        fetch('/leave_game');
                         window.location.href = "/";
                     }
                 }
@@ -112,6 +137,13 @@
 
         // Poll every 1 second
         setInterval(fetchGameState, 1000);
+
+        // Try to notify server when browser is closed (may not always work)
+        window.addEventListener('beforeunload', function() {
+            if (navigator.sendBeacon) {
+                navigator.sendBeacon('/leave_game');
+            }
+        });
     </script>
     {% endif %}
 </div>

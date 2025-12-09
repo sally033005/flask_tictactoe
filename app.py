@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import random
 import string
+import time
 from ai import best_move
 
 app = Flask(__name__)
@@ -69,7 +70,9 @@ def start():
             'players': {'X': player_name, 'O': None},
             'board': new_board(),
             'current': 'X',
-            'wins': {'X': 0, 'O': 0}
+            'wins': {'X': 0, 'O': 0},
+            'last_activity': {'X': time.time(), 'O': None},
+            'player_left': None  # 'X', 'O', or None
         }
         session['code'] = code
         session['player_symbol'] = 'X'
@@ -87,6 +90,7 @@ def join():
         if games[code]['players']['O'] is not None:
             return render_template('join.html', error="Game is full.")
         games[code]['players']['O'] = player_name
+        games[code]['last_activity']['O'] = time.time()
         session['code'] = code
         session['player_symbol'] = 'O'
         return redirect(url_for('game_room', code=code))
@@ -196,7 +200,19 @@ def reset():
         if code in games:
             games[code]['board'] = new_board()
             games[code]['current'] = 'X'
+            games[code]['player_left'] = None  # Reset leave status
     return redirect(url_for('game' if mode == '1' else 'game_room', code=session.get('code')))
+
+@app.route('/leave_game')
+def leave_game():
+    """Handle when a player chooses not to play again"""
+    mode = session.get('mode')
+    if mode == '2':
+        code = session.get('code')
+        player_symbol = session.get('player_symbol')
+        if code and code in games:
+            games[code]['player_left'] = player_symbol
+    return redirect(url_for('index'))
 
 @app.route('/game_state/', defaults={'code': None})
 @app.route('/game_state/<code>')
@@ -222,14 +238,49 @@ def game_state(code):
         if not code or code not in games:
             return jsonify({'error': 'Invalid game code'}), 404
         game = games[code]
-        return jsonify({
+        player_symbol = session.get('player_symbol')
+        
+        # Safety check: ensure player_symbol is valid
+        if not player_symbol or player_symbol not in ['X', 'O']:
+            return jsonify({'error': 'Invalid player'}), 400
+        
+        # Update last activity for the current player
+        if player_symbol in game['last_activity']:
+            game['last_activity'][player_symbol] = time.time()
+        
+        # Check for disconnections (no activity for 10 seconds)
+        current_time = time.time()
+        disconnected_player = None
+        # Check if the OTHER player (not the current one) is disconnected
+        other_symbol = 'O' if player_symbol == 'X' else 'X'
+        if game['players'][other_symbol] and game['last_activity'][other_symbol]:
+            if current_time - game['last_activity'][other_symbol] > 10:
+                disconnected_player = other_symbol
+        
+        # Check if other player left
+        other_player_left = None
+        if game['player_left']:
+            other_player_left = game['player_left']
+        
+        response = {
             'board': game['board'],
             'current': game['current'],
             'winner': check_winner(game['board']),
             'draw': check_draw(game['board']),
             'wins': game['wins'],
             'players': game['players']
-        })
+        }
+        
+        # Add disconnect/leave notifications
+        if disconnected_player:
+            response['disconnected'] = disconnected_player
+            response['disconnected_player_name'] = game['players'][disconnected_player]
+        
+        if other_player_left:
+            response['player_left'] = other_player_left
+            response['left_player_name'] = game['players'][other_player_left]
+        
+        return jsonify(response)
 
 if __name__ == '__main__':
     app.run(debug=True)
