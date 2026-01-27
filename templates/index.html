@@ -2,15 +2,29 @@
 
 {% block content %}
 <div class="container">
-    <h1>🎮 Tic Tac Toe</h1>
+    <div class="h1-styled">
+        <i data-lucide="gamepad-2" class="title-icon"></i>
+        Tic Tac Toe
+    </div>
+
+    <div class="divider"></div>
 
     <nav class="index-nav">
         <form action="/setup" method="post">
-            <button name="mode" value="1">1 Player (vs Computer)</button>
-            <button name="mode" value="2">2 Players (Online)</button>
+            <button name="mode" value="1" class="nav-item">
+                <div class="icon-circle"><i data-lucide="user"></i></div>
+                1 Player (vs Computer)
+            </button>
+            <button name="mode" value="2" class="nav-item">
+                <div class="icon-circle"><i data-lucide="users"></i></div>
+                2 Players (Online)
+            </button>
         </form>
 
-        <a href="/join" class="btn">Join a Game</a>
+        <a href="/join" class="btn btn-primary" style="margin-top: 20px;">
+            <i data-lucide="key"></i>
+            Join a Game
+        </a>
     </nav>
 </div>
 {% endblock %}

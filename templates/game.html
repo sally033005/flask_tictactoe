@@ -16,7 +16,7 @@
         {% if board[i] == ' ' %}
         <a href="{{ url_for('move', cell=i) }}" class="cell empty"></a>
         {% else %}
-        <div class="cell filled">{{ board[i] }}</div>
+        <div class="cell filled {{ board[i].lower() }}">{{ board[i] }}</div>
         {% endif %}
         {% endfor %}
     </div>
@@ -62,7 +62,7 @@
                 if (cells[idx].classList.contains('filled')) return;
                 if (val !== ' ') {
                     cells[idx].textContent = val;
-                    cells[idx].classList.add('filled');
+                    cells[idx].classList.add('filled', val.toLowerCase());
                     cells[idx].classList.remove('empty');
                     if (cells[idx].tagName === 'A') cells[idx].href = '#';
                 }
@@ -139,7 +139,7 @@
         setInterval(fetchGameState, 1000);
 
         // Try to notify server when browser is closed (may not always work)
-        window.addEventListener('beforeunload', function() {
+        window.addEventListener('beforeunload', function () {
             if (navigator.sendBeacon) {
                 navigator.sendBeacon('/leave_game');
             }

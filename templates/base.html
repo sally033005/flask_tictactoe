@@ -4,26 +4,41 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ title if title else "Tic Tac Toe" }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v={{ range(1, 1000) | random }}">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;1,400&display=swap"
+        rel="stylesheet">
 </head>
 
 <body>
+    <div class="bg-grid"></div>
+    <div class="floating-elements">
+        <div class="float-item" style="top: 15%; left: 10%;">X</div>
+        <div class="float-item" style="top: 65%; left: 85%;">O</div>
+        <div class="float-item" style="top: 85%; left: 20%;">X</div>
+        <div class="float-item" style="top: 25%; left: 75%;">O</div>
+    </div>
+
     <header class="main-header">
-        <div class="logo">Sally's Tic Tac Toe</div>
+        <div class="logo">
+            <span class="logo-sally">Sally's</span>
+            <span class="logo-ttt">Tic Tac Toe</span>
+        </div>
         <nav class="topnav">
             <a href="{{ url_for('index') }}">Home</a>
 
-            <form id="onePlayer" action="/setup" method="POST">
+            <form id="onePlayer" action="/setup" method="POST" style="display:none;">
                 <input type="hidden" name="mode" value="1">
-                <a href="#" onclick="document.getElementById('onePlayer').submit();">1 Player</a>
             </form>
+            <a href="#" onclick="document.getElementById('onePlayer').submit();">1 Player</a>
 
-            <form id="twoPlayer" action="/setup" method="POST">
+            <form id="twoPlayer" action="/setup" method="POST" style="display:none;">
                 <input type="hidden" name="mode" value="2">
-                <a href="#" onclick="document.getElementById('twoPlayer').submit();">2 Players</a>
             </form>
+            <a href="#" onclick="document.getElementById('twoPlayer').submit();">2 Players</a>
 
-            <a href="{{ url_for('join') }}">Join Game</a>
+            <a href="{{ url_for('join') }}" class="nav-highlight">Join Game</a>
         </nav>
     </header>
 
@@ -31,6 +46,15 @@
         {% block content %}{% endblock %}
     </main>
 
+    <footer class="main-footer">
+        <p>&copy; 2025 Sally's Tic Tac Toe. All rights reserved.</p>
+    </footer>
+
+    <script>
+        window.addEventListener('load', () => {
+            lucide.createIcons();
+        });
+    </script>
 </body>
 
 </html>
