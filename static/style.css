@@ -173,7 +173,7 @@ main.content {
 /* ---------------------------------------------------
    FOOTER
 --------------------------------------------------- */
-main-footer {
+.main-footer {
     padding: 20px;
     text-align: center;
     color: var(--text-secondary);
@@ -399,20 +399,133 @@ button:hover {
 --------------------------------------------------- */
 input,
 select {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(10, 10, 20, 0.6);
     border: 1px solid var(--glass-border);
     color: white;
     padding: 15px;
-    border-radius: 10px;
+    border-radius: 12px;
     width: 100%;
     box-sizing: border-box;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 1rem;
 }
 
-input:focus {
+input:focus,
+select:focus {
     outline: none;
     border-color: var(--neon-blue);
-    box-shadow: 0 0 10px rgba(0, 210, 255, 0.3);
+    box-shadow: var(--neon-glow);
+}
+
+/* Custom Dropdown Styling */
+.custom-select-wrapper {
+    position: relative;
+    width: 100%;
+    margin-bottom: 25px;
+    z-index: 10;
+}
+
+.select-box {
+    background: rgba(10, 10, 20, 0.7);
+    border: 1px solid var(--neon-blue);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(0, 210, 255, 0.1);
+}
+
+.select-box:hover {
+    border-color: #fff;
+    box-shadow: var(--neon-glow);
+}
+
+.custom-select-wrapper.active .select-box {
+    border-color: #fff;
+    box-shadow: var(--neon-glow);
+}
+
+.select-arrow {
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid var(--neon-blue);
+    transition: transform 0.3s ease;
+}
+
+.custom-select-wrapper.active .select-arrow {
+    transform: rotate(180deg);
+    border-top-color: #fff;
+}
+
+.select-options {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    width: 100%;
+    background: rgba(26, 26, 46, 0.98);
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--neon-blue);
+    border-radius: 12px;
+    overflow: hidden;
+    display: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), var(--neon-glow);
+}
+
+.custom-select-wrapper.active .select-options {
+    display: block;
+    animation: fadeIn 0.2s ease;
+}
+
+.option {
+    padding: 15px 20px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    font-size: 1rem;
+}
+
+.option:hover {
+    background: rgba(0, 210, 255, 0.2);
+    color: var(--neon-blue);
+    padding-left: 25px;
+    /* Subtle slide effect */
+}
+
+.option.active {
+    background: rgba(0, 210, 255, 0.1);
+    color: var(--neon-blue);
+    font-weight: 600;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Stylized selector label */
+form label {
+    display: block;
+    text-align: left;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 /* ---------------------------------------------------
