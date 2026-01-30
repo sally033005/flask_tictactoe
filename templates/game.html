@@ -1,150 +1,161 @@
 {% extends "base.html" %}
 {% block content %}
+
+<!-- ================= GAME RESULT MODAL ================= -->
+<div id="result-overlay" class="result-overlay hidden">
+    <div class="result-modal">
+        <h2 id="result-title">Game Over</h2>
+        <p id="result-message"></p>
+
+        <div class="result-actions">
+            <button id="play-again-btn" class="btn btn-primary">Play Again</button>
+            <button id="exit-btn" class="btn">Exit</button>
+        </div>
+    </div>
+</div>
+
 <div class="container">
 
     <p style="text-align:center;">
-        <strong>{{ player_name }}</strong> (X) vs <strong>{{ ai_name }}</strong> (O)
+        <strong>{{ player_name }}</strong> (X)
+        vs
+        <strong>{{ ai_name }}</strong> (O)
     </p>
 
     {% if mode == '1' %}
-    <p>Difficulty: {{ session.get('difficulty', 'hard').capitalize() }}</p>
+        <p>Difficulty: {{ session.get('difficulty', 'hard').capitalize() }}</p>
     {% endif %}
 
-
+    <!-- ================= GAME BOARD ================= -->
     <div class="board">
         {% for i in range(9) %}
-        {% if board[i] == ' ' %}
-        <a href="{{ url_for('move', cell=i) }}" class="cell empty"></a>
-        {% else %}
-        <div class="cell filled {{ board[i].lower() }}">{{ board[i] }}</div>
-        {% endif %}
+            {% if board[i] == ' ' %}
+                <a href="{{ url_for('move', cell=i) }}" class="cell empty"></a>
+            {% else %}
+                <div class="cell filled {{ board[i].lower() }}">{{ board[i] }}</div>
+            {% endif %}
         {% endfor %}
     </div>
 
+    <!-- ================= STATUS ================= -->
     <div id="status">
         <p id="current-turn">Current Turn: {{ current }}</p>
-        <p id="wins">Wins: {{ player_name }} (X) - {{ wins['X'] }} | {{ ai_name }} (O) - {{ wins['O'] }}</p>
+        <p id="wins">
+            Wins: {{ player_name }} (X) - {{ wins['X'] }}
+            |
+            {{ ai_name }} (O) - {{ wins['O'] }}
+        </p>
     </div>
+</div>
 
-    {% if mode == '1' %}
-    <script>
-        const winner = "{{ winner }}";
-        const draw = "{{ draw }}";
+<!-- ================= SHARED MODAL LOGIC ================= -->
+<script>
+    const overlay = document.getElementById("result-overlay");
+    const titleEl = document.getElementById("result-title");
+    const messageEl = document.getElementById("result-message");
 
-        function askPlayAgain(message) {
-            let again = confirm(message + "\n\nDo you want to play again?");
-            if (again) {
-                window.location.href = "/reset";
-            } else {
-                window.location.href = "/";
-            }
-        }
+    document.getElementById("play-again-btn").onclick = () => {
+        window.location.href = "/reset";
+    };
 
-        if (winner && winner !== "None") {
-            let msg = "Winner: " + (winner === 'X' ? "{{ player_name }}" : "{{ ai_name }}");
-            askPlayAgain(msg);
-        }
-        else if (draw === "True") {
-            askPlayAgain("It's a draw!");
-        }
-    </script>
-    {% endif %}
+    document.getElementById("exit-btn").onclick = () => {
+        fetch("/leave_game");
+        window.location.href = "/";
+    };
 
-    {% if mode == '2' %}
-    <script>
-        let mode = "{{ mode }}";
-        let gameId = "{{ code }}" || "";  // empty string for 1-player mode
-        let notificationShown = false;
+    function showResult(title, message) {
+        titleEl.textContent = title;
+        messageEl.textContent = message;
+        overlay.classList.remove("hidden");
+    }
+</script>
 
-        function updateBoard(board) {
-            const cells = document.querySelectorAll('.cell');
-            board.forEach((val, idx) => {
-                if (cells[idx].classList.contains('filled')) return;
-                if (val !== ' ') {
-                    cells[idx].textContent = val;
-                    cells[idx].classList.add('filled', val.toLowerCase());
-                    cells[idx].classList.remove('empty');
-                    if (cells[idx].tagName === 'A') cells[idx].href = '#';
-                }
-            });
-        }
+<!-- ================= SINGLE PLAYER ================= -->
+{% if mode == '1' %}
+<script>
+    const winner = "{{ winner }}";
+    const draw = "{{ draw }}";
 
-        async function fetchGameState() {
-            try {
-                const url = mode === '1' ? `/game_state/` : `/game_state/${gameId}`;
-                const res = await fetch(url);
-                const data = await res.json();
-                if (data.error) return;
+    if (winner && winner !== "None") {
+        const winnerName = winner === "X" ? "{{ player_name }}" : "{{ ai_name }}";
+        showResult("🏆 Victory!", `${winnerName} wins the game`);
+    } 
+    else if (draw === "True") {
+        showResult("🤝 Draw", "No one wins this round");
+    }
+</script>
+{% endif %}
 
-                // Check if other player left the game
-                if (data.player_left && data.left_player_name) {
-                    if (!notificationShown) {
-                        notificationShown = true;
-                        alert(`${data.left_player_name} has left the game. Returning to home page.`);
-                        window.location.href = "/";
-                    }
-                    return;
-                }
+<!-- ================= ONLINE MULTIPLAYER ================= -->
+{% if mode == '2' %}
+<script>
+    const gameId = "{{ code }}";
+    let notificationShown = false;
 
-                // Check if other player disconnected
-                if (data.disconnected && data.disconnected_player_name) {
-                    if (!notificationShown) {
-                        notificationShown = true;
-                        alert(`${data.disconnected_player_name} has disconnected. Returning to home page.`);
-                        window.location.href = "/";
-                    }
-                    return;
-                }
-
-                // Update board
-                updateBoard(data.board);
-
-                // Update current turn
-                document.getElementById('current-turn').textContent = "Current Turn: " + data.current;
-
-                // Update wins
-                let playerX = data.player_name || data.players.X;
-                let playerO = data.ai_name || data.players.O;
-                document.getElementById('wins').textContent =
-                    `Wins: ${playerX} (X) - ${data.wins['X']} | ${playerO} (O) - ${data.wins['O']}`;
-
-                // Show winner or draw
-                if (data.winner) {
-                    let winnerName = data.winner === 'X' ? playerX : playerO;
-                    let again = confirm(`Winner: ${winnerName}\n\nDo you want to play again?`);
-                    if (again) {
-                        window.location.href = "/reset";
-                    } else {
-                        // Notify server that this player is leaving
-                        fetch('/leave_game');
-                        window.location.href = "/";
-                    }
-                }
-                else if (data.draw) {
-                    let again = confirm("It's a draw!\n\nDo you want to play again?");
-                    if (again) {
-                        window.location.href = "/reset";
-                    } else {
-                        // Notify server that this player is leaving
-                        fetch('/leave_game');
-                        window.location.href = "/";
-                    }
-                }
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        // Poll every 1 second
-        setInterval(fetchGameState, 1000);
-
-        // Try to notify server when browser is closed (may not always work)
-        window.addEventListener('beforeunload', function () {
-            if (navigator.sendBeacon) {
-                navigator.sendBeacon('/leave_game');
+    function updateBoard(board) {
+        const cells = document.querySelectorAll(".cell");
+        board.forEach((val, idx) => {
+            if (cells[idx].classList.contains("filled")) return;
+            if (val !== " ") {
+                cells[idx].textContent = val;
+                cells[idx].classList.add("filled", val.toLowerCase());
+                cells[idx].classList.remove("empty");
+                if (cells[idx].tagName === "A") cells[idx].href = "#";
             }
         });
-    </script>
-    {% endif %}
-</div>
+    }
+
+    async function fetchGameState() {
+        try {
+            const res = await fetch(`/game_state/${gameId}`);
+            const data = await res.json();
+            if (data.error) return;
+
+            if (data.player_left && !notificationShown) {
+                notificationShown = true;
+                showResult("Player Left", `${data.left_player_name} has left the game`);
+                return;
+            }
+
+            if (data.disconnected && !notificationShown) {
+                notificationShown = true;
+                showResult("Disconnected", `${data.disconnected_player_name} has disconnected`);
+                return;
+            }
+
+            updateBoard(data.board);
+
+            document.getElementById("current-turn").textContent =
+                "Current Turn: " + data.current;
+
+            const playerX = data.players.X;
+            const playerO = data.players.O;
+
+            document.getElementById("wins").textContent =
+                `Wins: ${playerX} (X) - ${data.wins.X} | ${playerO} (O) - ${data.wins.O}`;
+
+            if (data.winner && !notificationShown) {
+                notificationShown = true;
+                const winnerName = data.winner === "X" ? playerX : playerO;
+                showResult("🏆 Victory!", `${winnerName} wins the game`);
+            }
+            else if (data.draw && !notificationShown) {
+                notificationShown = true;
+                showResult("🤝 Draw", "No one wins this round");
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    setInterval(fetchGameState, 1000);
+
+    window.addEventListener("beforeunload", () => {
+        if (navigator.sendBeacon) {
+            navigator.sendBeacon("/leave_game");
+        }
+    });
+</script>
+{% endif %}
+
 {% endblock %}
