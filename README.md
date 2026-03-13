@@ -141,7 +141,7 @@ https://flask-tictactoe.onrender.com/
 
 > Multiplayer gameplay 
 
-<video src="./static/Multiplayer_ScreenRecording.mp4" width="100%" controls></video>
+https://github.com/user-attachments/assets/371c0f6c-fd9b-4d29-b0a0-a64e962febeb
 
 ---
 
