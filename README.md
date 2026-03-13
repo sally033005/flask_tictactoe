@@ -131,9 +131,17 @@ https://flask-tictactoe.onrender.com/
 
 ## 🖼️ Screenshots
 
-> Single-player and multiplayer gameplay
+> Home 
 
-![Game Screenshot](./static/project_tictactoe.png)
+![Game Screenshot](./static/Home_Screenshot%20.png)
+
+> Single-player gameplay
+
+![Game Screenshot](./static/Game_Screenshot.png)
+
+> Multiplayer gameplay
+
+![Game Screenshot](./static/Screen_Recording%20.mov)
 
 ---
 
