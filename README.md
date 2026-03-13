@@ -139,9 +139,9 @@ https://flask-tictactoe.onrender.com/
 
 ![Game Screenshot](./static/Game_Screenshot.png)
 
-> Multiplayer gameplay
+> Multiplayer gameplay 
 
-![Game Screenshot](./static/Screen_Recording%20.mov)
+<video src="./static/Multiplayer_ScreenRecording.mp4" width="100%" controls></video>
 
 ---
 
